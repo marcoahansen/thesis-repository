@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Thesis {
+  id        String   @id @default(uuid())
+  title     String
+  keywords  String[]
+  filePath  String
+  year      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    Author   @relation(fields: [authorId], references: [id])
+  authorId  String   @unique
+
+  @@map("theses")
+}
+
+model Author {
+  id        String  @id @default(uuid())
+  name      String
+  Thesis    Thesis?
+  advisorId String
+
+  advisor Advisor @relation(fields: [advisorId], references: [id])
+
+  @@map("authors")
+}
+
+model Advisor {
+  id      String   @id @default(uuid())
+  name    String
+  authors Author[]
+
+  @@map("advisors")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  email    String  @unique
+  name     String?
+  password String
+}
