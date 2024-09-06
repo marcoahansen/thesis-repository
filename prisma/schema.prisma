@@ -9,9 +9,9 @@ datasource db {
 
 model Thesis {
   id        String   @id @default(uuid())
-  title     String
+  title     String   @db.VarChar(255)
   keywords  String[]
-  filePath  String
+  filePath  String   @db.VarChar(255)
   year      Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -23,7 +23,7 @@ model Thesis {
 
 model Author {
   id        String  @id @default(uuid())
-  name      String
+  name      String  @unique @db.VarChar(255)
   Thesis    Thesis?
   advisorId String
 
@@ -34,7 +34,7 @@ model Author {
 
 model Advisor {
   id      String   @id @default(uuid())
-  name    String
+  name    String   @unique @db.VarChar(255)
   authors Author[]
 
   @@map("advisors")
