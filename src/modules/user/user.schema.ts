@@ -8,6 +8,7 @@ export const createUserSchema = z.object({
     })
     .email(),
   password: z.string().min(6),
+  registration: z.string(),
   name: z.string(),
 });
 

@@ -1,11 +1,38 @@
 import { type FastifyReply, type FastifyRequest } from "fastify";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+
 import { prisma } from "../../lib/prisma";
+import { r2 } from "../../lib/cloudflare";
+
 import {
   GetThesisQuery,
   ThesisParams,
   UpdateThesisInput,
   type CreateThesisInput,
 } from "./thesis.schema";
+import { env } from "../../env";
+import { randomBytes } from "crypto";
+import { promisify } from "util";
+const randomBytesAsync = promisify(randomBytes);
+
+export async function getUploadUrl(req: FastifyRequest, reply: FastifyReply) {
+  const rawBytes = await randomBytesAsync(8);
+  const randomString = rawBytes.toString("hex");
+  const keyFile = randomString + ".pdf";
+
+  const signedUrl = await getSignedUrl(
+    r2,
+    new PutObjectCommand({
+      Bucket: env.BUCKET_NAME,
+      Key: keyFile,
+      ContentType: "text/csv",
+    }),
+    { expiresIn: 600 }
+  );
+
+  return await reply.code(201).send(signedUrl);
+}
 
 export async function createThesis(
   req: FastifyRequest<{
@@ -13,14 +40,23 @@ export async function createThesis(
   }>,
   reply: FastifyReply
 ) {
-  const { title, year, keywords, filePath, author_name, advisor_name } =
-    req.body;
+  const {
+    title,
+    year,
+    keywords,
+    abstract,
+    fileUrl,
+    author_name,
+    author_registration,
+    advisor_name,
+    advisor_registration,
+  } = req.body;
 
   const keywordsArray = keywords.map((keyword) => keyword);
 
   let advisor = await prisma.advisor.findUnique({
     where: {
-      name: advisor_name,
+      registration: advisor_registration,
     },
   });
 
@@ -28,6 +64,7 @@ export async function createThesis(
     advisor = await prisma.advisor.create({
       data: {
         name: advisor_name,
+        registration: advisor_registration,
       },
     });
   }
@@ -36,11 +73,13 @@ export async function createThesis(
     data: {
       title,
       year,
-      filePath,
+      abstract,
+      fileUrl,
       keywords: keywordsArray,
       author: {
         create: {
           name: author_name,
+          registration: author_registration,
           advisor: {
             connect: {
               id: advisor.id,
@@ -62,8 +101,17 @@ export async function updateThesis(
   reply: FastifyReply
 ) {
   const { id } = req.params;
-  const { title, year, keywords, filePath, author_name, advisor_name } =
-    req.body;
+  const {
+    title,
+    year,
+    keywords,
+    abstract,
+    fileUrl,
+    author_name,
+    author_registration,
+    advisor_name,
+    advisor_registration,
+  } = req.body;
 
   try {
     const thesis = await prisma.thesis.findUnique({
@@ -75,14 +123,14 @@ export async function updateThesis(
     }
 
     let advisor = null;
-    if (advisor_name) {
+    if (advisor_registration && advisor_name) {
       advisor = await prisma.advisor.findUnique({
-        where: { name: advisor_name },
+        where: { registration: advisor_registration },
       });
 
       if (!advisor) {
         advisor = await prisma.advisor.create({
-          data: { name: advisor_name },
+          data: { name: advisor_name, registration: advisor_registration },
         });
       }
     }
@@ -92,10 +140,12 @@ export async function updateThesis(
       data: {
         title,
         year,
-        filePath,
+        fileUrl,
+        abstract,
         keywords: keywords ? { set: keywords } : undefined,
         author: {
           update: {
+            registration: author_registration,
             name: author_name,
             advisor: advisor ? { connect: { id: advisor.id } } : undefined,
           },
@@ -123,10 +173,10 @@ export async function deleteThesis(
       where: { id },
     });
 
-    return reply.code(200).send(thesis);
+    return await reply.code(200).send(thesis);
   } catch (error) {
     console.error(error);
-    return reply.code(500).send({ message: "Failed to delete thesis" });
+    return await reply.code(500).send({ message: "Failed to delete thesis" });
   }
 }
 
@@ -136,7 +186,7 @@ export async function getThesis(req: FastifyRequest, reply: FastifyReply) {
       id: true,
       title: true,
       year: true,
-      filePath: true,
+      fileUrl: true,
       keywords: true,
       author: {
         select: {
@@ -173,7 +223,7 @@ export async function getThesisByKeywords(
       id: true,
       title: true,
       year: true,
-      filePath: true,
+      fileUrl: true,
       keywords: true,
       author: {
         select: {

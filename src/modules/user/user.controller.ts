@@ -15,7 +15,7 @@ export async function createUser(
   }>,
   reply: FastifyReply
 ) {
-  const { password, email, name } = req.body;
+  const { password, email, name, registration } = req.body;
   const user = await prisma.user.findUnique({
     where: {
       email,
@@ -33,6 +33,7 @@ export async function createUser(
         password: hash,
         email,
         name,
+        registration,
       },
     });
     return await reply.code(201).send(user);
