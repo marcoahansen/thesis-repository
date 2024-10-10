@@ -4,6 +4,7 @@ import {
   createThesisResponseSchema,
   createThesisSchema,
   updateThesisSchema,
+  thesisParams,
 } from "./thesis.schema";
 import {
   createThesis,
@@ -49,9 +50,7 @@ export async function thesisRoutes(app: FastifyInstance) {
     {
       preHandler: [app.authenticate],
       schema: {
-        params: {
-          id: { type: "string" },
-        },
+        params: thesisParams,
       },
     },
     deleteThesis

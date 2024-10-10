@@ -147,6 +147,9 @@ export async function deleteThesis(
     return await reply.code(200).send(thesis);
   } catch (error) {
     console.error(error);
+    if ((error as { code: string }).code === "P2025") {
+      return await reply.code(404).send({ message: "Thesis not found" });
+    }
     return await reply.code(500).send({ message: "Failed to delete thesis" });
   }
 }
@@ -171,6 +174,11 @@ export async function getThesis(
         author: {
           select: {
             name: true,
+            advisor: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },

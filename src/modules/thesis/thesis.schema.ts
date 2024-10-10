@@ -25,8 +25,8 @@ const updateThesisSchema = z.object({
 });
 export type UpdateThesisInput = z.infer<typeof updateThesisSchema>;
 
-const thesisParams = z.object({
-  id: z.string(),
+export const thesisParams = z.object({
+  id: z.string().uuid(),
 });
 
 export type ThesisParams = z.infer<typeof thesisParams>;
