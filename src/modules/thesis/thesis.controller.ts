@@ -183,7 +183,6 @@ export async function getThesis(
   }>,
   reply: FastifyReply
 ) {
-  console.log(req.query);
   const skip = Number(req.query.skip) || 0;
   const take = Number(req.query.take) || 20;
   const search = req.query.search || "";
