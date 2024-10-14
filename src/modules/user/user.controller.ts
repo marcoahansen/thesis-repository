@@ -3,6 +3,7 @@ import {
   GetUsersQuery,
   GetUsersResponse,
   UpdateUserInput,
+  UsersFilters,
   type CreateUserInput,
   type LoginUserInput,
 } from "./user.schema";
@@ -69,7 +70,7 @@ export async function updateUser(
     hash = await bcrypt.hash(password, SALT_ROUNDS);
   }
 
-  const updatedUser = await prisma.user.update({
+  await prisma.user.update({
     where: {
       id: req.user.id,
     },
@@ -79,7 +80,7 @@ export async function updateUser(
     },
   });
 
-  return await reply.code(200).send(updatedUser);
+  return await reply.code(200).send({ message: "User updated successfully" });
 }
 
 export async function deleteUser(
@@ -141,9 +142,36 @@ export async function getUsers(
 ) {
   const skip = Number(req.query.skip) || 0;
   const take = Number(req.query.take) || 20;
+  const search = req.query.search || "";
+  const orderBy = req.query.orderBy || "name";
+  const sort = (req.query.sort || "desc") as "asc" | "desc";
+
+  const searchConditions: UsersFilters = {
+    OR: [
+      {
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        registration: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        email: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    ],
+  };
 
   const [users, total] = await prisma.$transaction([
     prisma.user.findMany({
+      where: searchConditions,
       take,
       skip,
       select: {
@@ -153,10 +181,12 @@ export async function getUsers(
         email: true,
       },
       orderBy: {
-        name: "asc",
+        [orderBy]: sort,
       },
     }),
-    prisma.user.count(),
+    prisma.user.count({
+      where: searchConditions,
+    }),
   ]);
 
   const totalPages = take ? Math.ceil(total / take) : 1;

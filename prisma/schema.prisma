@@ -43,6 +43,7 @@ model Advisor {
   id           String   @id @default(uuid())
   name         String   @unique @db.VarChar(255)
   registration String   @unique
+  email        String   @unique
   authors      Author[]
 
   @@map("advisors")

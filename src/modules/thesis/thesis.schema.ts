@@ -38,6 +38,9 @@ const createThesisResponseSchema = z.object({
 const getThesisQuerySchema = z.object({
   take: z.number().optional(),
   skip: z.number().optional(),
+  search: z.string().optional(),
+  orderBy: z.string().optional(),
+  sort: z.string().optional(),
 });
 
 export type GetThesisQuery = z.infer<typeof getThesisQuerySchema>;
@@ -63,6 +66,31 @@ const getThesisResponseSchema = z.object({
 });
 
 export type GetThesisResponse = z.infer<typeof getThesisResponseSchema>;
+
+export type ThesisFilters = {
+  OR?: Array<{
+    title?: {
+      contains: string;
+      mode: "insensitive";
+    };
+    keywords?: {
+      has: string;
+    };
+    year?: number;
+    author?: {
+      name?: {
+        contains: string;
+        mode: "insensitive";
+      };
+      advisor?: {
+        name?: {
+          contains: string;
+          mode: "insensitive";
+        };
+      };
+    };
+  }>;
+};
 
 export {
   createThesisResponseSchema,

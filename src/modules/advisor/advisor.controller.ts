@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
   AdvisorParams,
+  AdvisorsFilters,
   CreateAdvisorInput,
   GetAdvisorQuery,
   GetAdvisorResponse,
@@ -14,12 +15,13 @@ export async function createAdvisor(
   }>,
   reply: FastifyReply
 ) {
-  const { name, registration } = req.body;
+  const { name, registration, email } = req.body;
 
   const advisor = await prisma.advisor.create({
     data: {
       name,
       registration,
+      email,
     },
   });
 
@@ -33,16 +35,28 @@ export async function updateAdvisor(
   }>,
   reply: FastifyReply
 ) {
-  const { name, registration } = req.body;
+  const { name, registration, email } = req.body;
   const { id } = req.params;
 
-  const advisor = await prisma.advisor.update({
+  const advisor = await prisma.advisor.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (!advisor) {
+    return await reply.code(404).send({
+      message: "Advisor not found",
+    });
+  }
+
+  await prisma.advisor.update({
     where: {
       id,
     },
     data: {
-      name,
-      registration,
+      ...(name && { name }),
+      ...(registration && { registration }),
+      ...(email && { email }),
     },
   });
 
@@ -95,21 +109,51 @@ export async function getAdvisors(
 ) {
   const skip = Number(req.query.skip) || 0;
   const take = Number(req.query.take) || 20;
+  const search = req.query.search || "";
+  const orderBy = req.query.orderBy || "name";
+  const sort = (req.query.sort || "desc") as "asc" | "desc";
+
+  const searchConditions: AdvisorsFilters = {
+    OR: [
+      {
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        registration: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        email: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    ],
+  };
 
   const [advisors, total] = await prisma.$transaction([
     prisma.advisor.findMany({
+      where: searchConditions,
       take,
       skip,
       select: {
         id: true,
         name: true,
         registration: true,
+        email: true,
       },
       orderBy: {
-        name: "asc",
+        [orderBy]: sort,
       },
     }),
-    prisma.advisor.count(),
+    prisma.advisor.count({
+      where: searchConditions,
+    }),
   ]);
 
   const totalPages = take ? Math.ceil(total / take) : 1;
@@ -119,4 +163,21 @@ export async function getAdvisors(
     total,
     totalPages,
   })) as GetAdvisorResponse;
+}
+
+export async function getAdvisorsNames(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  const advisorsNames = await prisma.advisor.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  return await reply.code(200).send(advisorsNames);
 }

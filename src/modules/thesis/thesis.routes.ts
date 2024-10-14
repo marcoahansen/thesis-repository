@@ -55,7 +55,7 @@ export async function thesisRoutes(app: FastifyInstance) {
     },
     deleteThesis
   );
-  app.withTypeProvider<ZodTypeProvider>().get(
+  app.withTypeProvider<ZodTypeProvider>().post(
     "/upload",
     {
       preHandler: [app.authenticate],

@@ -7,6 +7,7 @@ async function seed() {
     data: {
       name: "Dr. Alice Johnson",
       registration: "A12345",
+      email: "alice@exemple.com",
     },
   });
 
@@ -14,6 +15,7 @@ async function seed() {
     data: {
       name: "Dr. Bob Smith",
       registration: "B54321",
+      email: "bob@exemple.com",
     },
   });
 
@@ -72,24 +74,6 @@ async function seed() {
       },
     });
   }
-
-  // Seed Users
-  await prisma.user.createMany({
-    data: [
-      {
-        email: "admin@example.com",
-        registration: "R10001",
-        name: "admin",
-        password: "password123",
-      },
-      {
-        email: "jane.roe@example.com",
-        registration: "R10002",
-        name: "Jane Roe",
-        password: "password456",
-      },
-    ],
-  });
 }
 
 seed()

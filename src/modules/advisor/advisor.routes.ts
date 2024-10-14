@@ -6,25 +6,26 @@ import {
   updateAdvisor,
   getTopAdvisors,
   getAdvisors,
+  getAdvisorsNames,
 } from "./advisor.controller";
 
 export async function advisorRoutes(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
-    "/",
+    "/register",
     {
       preHandler: [app.authenticate],
     },
     createAdvisor
   );
   app.withTypeProvider<ZodTypeProvider>().put(
-    "/:id",
+    "/:id/update",
     {
       preHandler: [app.authenticate],
     },
     updateAdvisor
   );
   app.withTypeProvider<ZodTypeProvider>().delete(
-    "/:id",
+    "/:id/delete",
     {
       preHandler: [app.authenticate],
     },
@@ -32,4 +33,5 @@ export async function advisorRoutes(app: FastifyInstance) {
   );
   app.withTypeProvider<ZodTypeProvider>().get("/top", getTopAdvisors);
   app.withTypeProvider<ZodTypeProvider>().get("/", getAdvisors);
+  app.withTypeProvider<ZodTypeProvider>().get("/all", getAdvisorsNames);
 }
