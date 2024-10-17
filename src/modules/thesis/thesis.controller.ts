@@ -298,39 +298,53 @@ export async function getThesisById(
   return await reply.code(200).send(thesis);
 }
 
-export async function getThesisByKeywords(
-  req: FastifyRequest<{
-    Querystring: { keywords: string };
-  }>,
-  reply: FastifyReply
-) {
-  const { keywords } = req.query;
-
-  const keywordsArray = keywords ? decodeURIComponent(keywords).split(",") : [];
-
-  const thesis = await prisma.thesis.findMany({
-    where: {
-      keywords: {
-        hasSome: keywordsArray,
-      },
-    },
+export async function getTopKeywords(req: FastifyRequest, reply: FastifyReply) {
+  const theses = await prisma.thesis.findMany({
     select: {
-      id: true,
-      title: true,
-      year: true,
-      fileUrl: true,
       keywords: true,
-      author: {
-        select: {
-          name: true,
-          advisor: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
     },
   });
-  return await reply.code(200).send(thesis);
+  console.log(theses);
+
+  const keywordCount: Record<string, number> = {};
+
+  theses.forEach((thesis) => {
+    thesis.keywords.forEach((keyword) => {
+      const normalizedKeyword = keyword.toLowerCase();
+      if (keywordCount[normalizedKeyword]) {
+        keywordCount[normalizedKeyword] += 1;
+      } else {
+        keywordCount[normalizedKeyword] = 1;
+      }
+    });
+  });
+
+  const sortedKeywords = Object.entries(keywordCount)
+    .map(([keyword, count]) => ({ keyword, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  return await reply.code(200).send(sortedKeywords);
+}
+
+export async function getThesisByYear(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  const thesisByYear = await prisma.thesis.groupBy({
+    by: ["year"],
+    _count: {
+      id: true,
+    },
+    orderBy: {
+      year: "asc",
+    },
+  });
+
+  return await reply.code(200).send(
+    thesisByYear.map((item) => ({
+      year: item.year,
+      thesis: item._count.id,
+    }))
+  );
 }

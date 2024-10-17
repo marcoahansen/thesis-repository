@@ -95,10 +95,15 @@ export async function getTopAdvisors(req: FastifyRequest, reply: FastifyReply) {
         _count: "desc",
       },
     },
-    take: 10,
+    take: 5,
   });
 
-  return await reply.code(200).send(topAdvisors);
+  return await reply.code(200).send(
+    topAdvisors.map((advisor) => ({
+      name: advisor.name,
+      authors: advisor._count.authors,
+    }))
+  );
 }
 
 export async function getAdvisors(

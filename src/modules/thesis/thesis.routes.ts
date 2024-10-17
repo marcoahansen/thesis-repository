@@ -10,10 +10,11 @@ import {
   createThesis,
   deleteThesis,
   getThesis,
-  getThesisByKeywords,
   updateThesis,
   getUploadUrl,
   getThesisById,
+  getTopKeywords,
+  getThesisByYear,
 } from "./thesis.controller";
 
 export async function thesisRoutes(app: FastifyInstance) {
@@ -65,7 +66,6 @@ export async function thesisRoutes(app: FastifyInstance) {
 
   app.withTypeProvider<ZodTypeProvider>().get("/", getThesis);
   app.withTypeProvider<ZodTypeProvider>().get("/:id", getThesisById);
-  app
-    .withTypeProvider<ZodTypeProvider>()
-    .get("/search/:keywords", getThesisByKeywords);
+  app.withTypeProvider<ZodTypeProvider>().get("/keywords", getTopKeywords);
+  app.withTypeProvider<ZodTypeProvider>().get("/year", getThesisByYear);
 }
