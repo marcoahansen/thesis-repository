@@ -304,7 +304,6 @@ export async function getTopKeywords(req: FastifyRequest, reply: FastifyReply) {
       keywords: true,
     },
   });
-  console.log(theses);
 
   const keywordCount: Record<string, number> = {};
 
