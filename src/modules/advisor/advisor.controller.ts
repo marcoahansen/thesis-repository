@@ -20,8 +20,8 @@ export async function createAdvisor(
   const advisor = await prisma.advisor.create({
     data: {
       name,
-      registration,
-      email,
+      ...(registration && { registration }),
+      ...(email && { email }),
     },
   });
 
@@ -99,10 +99,17 @@ export async function getTopAdvisors(req: FastifyRequest, reply: FastifyReply) {
   });
 
   return await reply.code(200).send(
-    topAdvisors.map((advisor) => ({
-      name: advisor.name,
-      authors: advisor._count.authors,
-    }))
+    topAdvisors.map(
+      (advisor: {
+        name: string;
+        _count: {
+          authors: number;
+        };
+      }) => ({
+        name: advisor.name,
+        authors: advisor._count.authors,
+      })
+    )
   );
 }
 

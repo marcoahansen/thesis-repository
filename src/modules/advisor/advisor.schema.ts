@@ -2,8 +2,8 @@ import { z } from "zod";
 
 const createAdvisorSchema = z.object({
   name: z.string(),
-  registration: z.string(),
-  email: z.string(),
+  registration: z.string().optional(),
+  email: z.string().optional(),
 });
 
 export type CreateAdvisorInput = z.infer<typeof createAdvisorSchema>;

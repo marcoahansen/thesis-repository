@@ -16,7 +16,7 @@ import {
 import { env } from "../../env";
 import { randomBytes } from "crypto";
 import { promisify } from "util";
-import { isYear } from "../../utils/functions";
+import { isYear, validateYear } from "../../utils/functions";
 const randomBytesAsync = promisify(randomBytes);
 
 export async function getUploadUrl(
@@ -64,6 +64,13 @@ export async function createThesis(
   } = req.body;
 
   const keywordsArray = keywords.map((keyword) => keyword);
+
+  const yearValidationError = year && validateYear(year);
+  if (yearValidationError) {
+    return reply.code(400).send({
+      message: yearValidationError,
+    });
+  }
 
   const author = await prisma.author.findUnique({
     where: {
@@ -127,6 +134,13 @@ export async function updateThesis(
 
     if (!thesis) {
       return reply.code(404).send({ message: "Thesis not found" });
+    }
+
+    const yearValidationError = year && validateYear(year);
+    if (yearValidationError) {
+      return reply.code(400).send({
+        message: yearValidationError,
+      });
     }
 
     const updatedThesis = await prisma.thesis.update({
@@ -307,8 +321,8 @@ export async function getTopKeywords(req: FastifyRequest, reply: FastifyReply) {
 
   const keywordCount: Record<string, number> = {};
 
-  theses.forEach((thesis) => {
-    thesis.keywords.forEach((keyword) => {
+  theses.forEach((thesis: { keywords: string[] }) => {
+    thesis.keywords.forEach((keyword: string) => {
       const normalizedKeyword = keyword.toLowerCase();
       if (keywordCount[normalizedKeyword]) {
         keywordCount[normalizedKeyword] += 1;
@@ -341,9 +355,16 @@ export async function getThesisByYear(
   });
 
   return await reply.code(200).send(
-    thesisByYear.map((item) => ({
-      year: item.year,
-      thesis: item._count.id,
-    }))
+    thesisByYear.map(
+      (item: {
+        year: number;
+        _count: {
+          id: number;
+        };
+      }) => ({
+        year: item.year,
+        thesis: item._count.id,
+      })
+    )
   );
 }

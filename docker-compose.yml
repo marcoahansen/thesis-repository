@@ -1,4 +1,18 @@
 services:
+  app:
+    image: thesis-repository-image
+    container_name: thesis-repository-container
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3333:3333
+    depends_on:
+      - dcs-postgres
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@dcs-postgres:5432/mydb?schema=public"
+  
   dcs-postgres:
     image: postgres:15.3-alpine
     container_name: dcs-postgres
@@ -10,6 +24,19 @@ services:
       - 5432:5432
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+
+  prisma-studio:
+    image: node:20
+    working_dir: /src
+    volumes:
+      - .:/src
+    depends_on:
+      - dcs-postgres
+    command: ["npx", "prisma", "studio"]
+    ports:
+      - 5555:5555
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@dcs-postgres:5432/mydb?schema=public"
 
 networks:
   default:
