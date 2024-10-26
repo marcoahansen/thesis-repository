@@ -38,8 +38,8 @@ model Author {
 model Advisor {
   id           String   @id @default(uuid())
   name         String   @unique @db.VarChar(255)
-  registration String?  @unique
-  email        String?  @unique
+  registration String?
+  email        String?
   authors      Author[]
 
   @@map("advisors")
