@@ -39,7 +39,7 @@ app.register(fCookie, {
 });
 
 app.register(cors, {
-  origin: ["http://localhost:5173", "http://localhost:4173"],
+  origin: [env.CORS, env.CORS_BUILD],
   credentials: true,
 });
 
@@ -54,7 +54,7 @@ app.register(thesisRoutes, { prefix: "api/theses" });
 app.register(userRoutes, { prefix: "api/users" });
 app.register(advisorRoutes, { prefix: "api/advisors" });
 
-app.listen({ port: env.PORT, host: "0.0.0.0" }).then(() => {
+app.listen({ port: env.PORT, host: env.HOST }).then(() => {
   console.log("Server running!");
 });
 
