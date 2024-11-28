@@ -340,6 +340,34 @@ export async function getTopKeywords(req: FastifyRequest, reply: FastifyReply) {
   return await reply.code(200).send(sortedKeywords);
 }
 
+export async function getAllKeywords(req: FastifyRequest, reply: FastifyReply) {
+  const theses = await prisma.thesis.findMany({
+    select: {
+      keywords: true,
+    },
+  });
+
+  const keywordCount: Record<string, number> = {};
+
+  theses.forEach((thesis: { keywords: string[] }) => {
+    thesis.keywords.forEach((keyword: string) => {
+      const normalizedKeyword = keyword.toLowerCase();
+      if (keywordCount[normalizedKeyword]) {
+        keywordCount[normalizedKeyword] += 1;
+      } else {
+        keywordCount[normalizedKeyword] = 1;
+      }
+    });
+  });
+
+  const sortedKeywords = Object.entries(keywordCount)
+    .map(([keyword, count]) => ({ keyword, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 100);
+
+  return await reply.code(200).send(sortedKeywords);
+}
+
 export async function getThesisByYear(
   req: FastifyRequest,
   reply: FastifyReply

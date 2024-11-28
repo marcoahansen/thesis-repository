@@ -74,6 +74,14 @@ Siga estes passos para configurar o projeto localmente:
    npm run prisma:seed
    ```
 
+## Build Docker
+
+Para realizar o build da imagem docker execute:
+
+```bash
+docker-compose up -d --build
+```
+
 ## Uso
 
 Para iniciar o servidor de desenvolvimento, use o seguinte comando:

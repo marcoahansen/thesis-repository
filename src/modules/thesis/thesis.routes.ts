@@ -15,6 +15,7 @@ import {
   getThesisById,
   getTopKeywords,
   getThesisByYear,
+  getAllKeywords,
 } from "./thesis.controller";
 
 export async function thesisRoutes(app: FastifyInstance) {
@@ -67,5 +68,6 @@ export async function thesisRoutes(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().get("/", getThesis);
   app.withTypeProvider<ZodTypeProvider>().get("/:id", getThesisById);
   app.withTypeProvider<ZodTypeProvider>().get("/keywords", getTopKeywords);
+  app.withTypeProvider<ZodTypeProvider>().get("/all-keywords", getAllKeywords);
   app.withTypeProvider<ZodTypeProvider>().get("/year", getThesisByYear);
 }
