@@ -12,7 +12,7 @@ services:
       - dcs-postgres
     environment:
       DATABASE_URL: "postgresql://postgres:password@dcs-postgres:5432/mydb?schema=public"
-  
+
   dcs-postgres:
     image: postgres:15.3-alpine
     container_name: dcs-postgres
@@ -37,6 +37,21 @@ services:
       - 5555:5555
     environment:
       DATABASE_URL: "postgresql://postgres:password@dcs-postgres:5432/mydb?schema=public"
+
+  frontend:
+    image: nginx:alpine
+    container_name: thesis-repository-frontend
+    restart: always
+    build:
+      context: ../thesis-repository-client
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    volumes:
+      - ../thesis-repository-client/dist:/usr/share/nginx/html:ro
+      - ../thesis-repository-client/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
 
 networks:
   default:
