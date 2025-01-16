@@ -6,6 +6,9 @@
     "dev": "tsx watch src/server.ts",
     "start": "tsc && node dist/server.js"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "keywords": [],
   "author": "Marco Aurelio Hansen",
   "license": "ISC",
