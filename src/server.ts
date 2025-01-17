@@ -39,7 +39,7 @@ app.register(fCookie, {
 });
 
 app.register(cors, {
-  origin: [env.CORS_DEV, env.CORS_BUILD, env.CORS_DOCKER],
+  origin: [env.CORS_DEV, env.CORS_BUILD, env.CORS_DOCKER, env.CORS_PROD],
   credentials: true,
 });
 

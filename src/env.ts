@@ -10,6 +10,7 @@ const envSchema = z.object({
   CORS_DEV: z.string().default("http://localhost:5173"),
   CORS_BUILD: z.string().default("http://localhost:4173"),
   CORS_DOCKER: z.string().default("http://localhost"),
+  CORS_PROD: z.string().default("http://192.168.4.4"),
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string(),
   FCOOKIE_SECRET: z.string(),
