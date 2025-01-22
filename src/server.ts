@@ -41,6 +41,7 @@ app.register(fCookie, {
 app.register(cors, {
   origin: [env.CORS_DEV, env.CORS_BUILD, env.CORS_DOCKER, env.CORS_PROD],
   credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
 });
 
 app.get("/api/health-check", (req, res) => {
