@@ -42,7 +42,7 @@ app.register(cors, {
   origin: [env.CORS_DEV, env.CORS_BUILD, env.CORS_DOCKER, env.CORS_PROD],
   hook: "preHandler",
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "Set-Cookie"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 });
 
 app.get("/api/health-check", (req, res) => {
