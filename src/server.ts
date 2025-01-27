@@ -34,13 +34,15 @@ app.decorate(
 );
 
 app.register(fCookie, {
-  secret: env.JWT_SECRET,
+  secret: env.FCOOKIE_SECRET,
   hook: "preHandler",
 });
 
 app.register(cors, {
   origin: [env.CORS_DEV, env.CORS_BUILD, env.CORS_DOCKER, env.CORS_PROD],
+  hook: "preHandler",
   credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization", "Set-Cookie"],
 });
 
 app.get("/api/health-check", (req, res) => {
