@@ -124,7 +124,7 @@ export async function login(
   reply.setCookie("access_token", token, {
     path: "/",
     httpOnly: true,
-    secure: true,
+    secure: false,
     maxAge: 60 * 60 * 24 * 7,
   });
   return { accessToken: token, user: payload };
