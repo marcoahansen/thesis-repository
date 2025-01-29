@@ -10,6 +10,7 @@ services:
       - 3333:3333
     depends_on:
       - dcs-postgres
+      - minio
     environment:
       DATABASE_URL: "postgresql://postgres:password@dcs-postgres:5432/mydb?schema=public"
 
@@ -24,6 +25,20 @@ services:
       - 5432:5432
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: Root1234
+    volumes:
+      - ~/minio/data:/data
+    command: server /data --console-address ":9001"
+
 
   prisma-studio:
     image: node:20
