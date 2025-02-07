@@ -1,7 +1,7 @@
 services:
   app:
     image: thesis-repository-image
-    container_name: thesis-repository-container
+    container_name: thesis-repository-backend
     restart: always
     build:
       context: .

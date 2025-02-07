@@ -1,6 +1,6 @@
 import { type FastifyReply, type FastifyRequest } from "fastify";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
 import { prisma } from "../../lib/prisma";
 import { r2 } from "../../lib/cloudflare";
@@ -44,6 +44,29 @@ export async function getUploadUrl(
     key: keyFile,
     url: signedUrl,
   });
+}
+
+export async function deleteFile(
+  req: FastifyRequest<{
+    Params: { key: string };
+  }>,
+  reply: FastifyReply
+) {
+  const { key } = req.params;
+
+  try {
+    await r2.send(
+      new DeleteObjectCommand({
+        Bucket: env.BUCKET_NAME,
+        Key: key,
+      })
+    );
+
+    return await reply.code(200).send({ message: "File deleted" });
+  } catch (error) {
+    console.error(error);
+    return await reply.code(500).send({ message: "Failed to delete file" });
+  }
 }
 
 export async function createThesis(

@@ -16,6 +16,7 @@ import {
   getTopKeywords,
   getThesisByYear,
   getAllKeywords,
+  deleteFile,
 } from "./thesis.controller";
 
 export async function thesisRoutes(app: FastifyInstance) {
@@ -63,6 +64,14 @@ export async function thesisRoutes(app: FastifyInstance) {
       preHandler: [app.authenticate],
     },
     getUploadUrl
+  );
+
+  app.withTypeProvider<ZodTypeProvider>().delete(
+    "/file/:key",
+    {
+      preHandler: [app.authenticate],
+    },
+    deleteFile
   );
 
   app.withTypeProvider<ZodTypeProvider>().get("/", getThesis);
